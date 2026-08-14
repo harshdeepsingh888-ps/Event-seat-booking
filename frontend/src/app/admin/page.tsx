@@ -1,199 +1,37 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import {
-  EventDetail,
-  EventSummary,
-  BookingHistoryResponse,
-} from "@/types";
-import { api, ApiClientError } from "@/lib/api";
-import AnalyticsCards from "@/components/admin/AnalyticsCards";
-import AdminSeatGrid from "@/components/admin/AdminSeatGrid";
-import BookingHistoryTable from "@/components/admin/BookingHistoryTable";
+import { ApiClientError, api } from "@/lib/api";
+import { Event } from "@/types";
+import AdminEventCard from "@/components/admin/AdminEventCard";
 
-interface PageProps {
-  params: Promise<{ eventId: string }>;
-}
-
-export default function AdminEventDetailPage({ params }: PageProps) {
-  const resolvedParams = use(params);
-  const eventId = resolvedParams.eventId;
-
-  const [eventDetail, setEventDetail] =
-    useState<EventDetail | null>(null);
-  const [summary, setSummary] =
-    useState<EventSummary | null>(null);
-  const [bookingHistory, setBookingHistory] =
-    useState<BookingHistoryResponse | null>(null);
-
+export default function AdminPage() {
+  const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] =
-    useState<"seats" | "history">("seats");
 
-  useEffect(() => {
-    let cancelled = false;
-
-    const fetchAllData = async () => {
-      try {
-        const [detailData, summaryData, historyData] =
-          await Promise.all([
-            api.getEventDetail(eventId),
-            api.getEventSummary(eventId),
-            api.getBookingHistory(eventId),
-          ]);
-
-        if (!cancelled) {
-          setEventDetail(detailData);
-          setSummary(summaryData);
-          setBookingHistory(historyData);
-          setError(null);
-        }
-      } catch (err: unknown) {
-        if (!cancelled) {
-          const message =
-            err instanceof ApiClientError
-              ? err.message
-              : "Failed to load admin event data.";
-
-          setError(message);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    };
-
-    // Initial server synchronization.
-    // See the corresponding note in the admin event-list page.
-    void fetchAllData();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [eventId]);
-
-  const loadAllData = async () => {
+  const loadEvents = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const [detailData, summaryData, historyData] =
-        await Promise.all([
-          api.getEventDetail(eventId),
-          api.getEventSummary(eventId),
-          api.getBookingHistory(eventId),
-        ]);
-
-      setEventDetail(detailData);
-      setSummary(summaryData);
-      setBookingHistory(historyData);
+      const data = await api.getEvents();
+      setEvents(data);
     } catch (err: unknown) {
-      const message =
+      setError(
         err instanceof ApiClientError
           ? err.message
-          : "Failed to load admin event data.";
-
-      setError(message);
+          : "Failed to load events."
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading && !eventDetail) {
-    return (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "2rem",
-        }}
-      >
-        <div
-          className="skeleton"
-          style={{
-            height: "40px",
-            width: "40%",
-          }}
-        />
-
-        <div
-          className="skeleton"
-          style={{
-            height: "100px",
-            width: "100%",
-          }}
-        />
-
-        <div
-          className="skeleton"
-          style={{
-            height: "320px",
-            width: "100%",
-          }}
-        />
-      </div>
-    );
-  }
-
-  if (
-    error ||
-    !eventDetail ||
-    !summary ||
-    !bookingHistory
-  ) {
-    return (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "1.5rem",
-        }}
-      >
-        <Link
-          href="/admin"
-          className="btn btn-outline"
-          style={{ width: "fit-content" }}
-        >
-          &larr; Back to Admin Console
-        </Link>
-
-        <div className="alert alert-error">
-          <svg
-            width="20"
-            height="20"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-
-          <div>
-            {error || "Event data not found."}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const formattedDate = new Date(
-    eventDetail.event_date
-  ).toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  useEffect(() => {
+    void loadEvents();
+  }, []);
 
   return (
     <div
@@ -203,188 +41,126 @@ export default function AdminEventDetailPage({ params }: PageProps) {
         gap: "2rem",
       }}
     >
-      <div>
-        <div
-          style={{
-            fontSize: "0.8rem",
-            color: "var(--text-muted)",
-            fontWeight: 700,
-            marginBottom: "0.3rem",
-          }}
-        >
-          Dashboard &gt; Events &gt; {eventDetail.name}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          gap: "1rem",
+          flexWrap: "wrap",
+        }}
+      >
+        <div>
+          <div
+            style={{
+              fontSize: "0.8rem",
+              color: "var(--text-muted)",
+              fontWeight: 700,
+              marginBottom: "0.35rem",
+            }}
+          >
+            Operations &gt; Events
+          </div>
+
+          <h1
+            style={{
+              fontSize: "2rem",
+              fontWeight: 800,
+              color: "var(--text-primary)",
+              margin: 0,
+            }}
+          >
+            Admin Console
+          </h1>
+
+          <p
+            style={{
+              color: "var(--text-secondary)",
+              marginTop: "0.4rem",
+            }}
+          >
+            Manage events, seats, and booking activity.
+          </p>
         </div>
 
+        <div style={{ display: "flex", gap: "0.75rem" }}>
+          <button
+            className="btn btn-outline"
+            onClick={() => void loadEvents()}
+            disabled={loading}
+          >
+            Refresh
+          </button>
+
+          <Link href="/admin?create=true" className="btn btn-teal">
+            Create Event
+          </Link>
+        </div>
+      </div>
+
+      {loading ? (
         <div
           style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            flexWrap: "wrap",
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
             gap: "1rem",
           }}
         >
-          <div>
+          {[1, 2, 3].map((item) => (
             <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "0.75rem",
-              }}
-            >
-              <h1
-                style={{
-                  fontSize: "2rem",
-                  fontWeight: 800,
-                  color: "var(--text-primary)",
-                }}
-              >
-                {eventDetail.name}
-              </h1>
-
-              <span className="badge-pill badge-active">
-                <span className="badge-dot" />
-                Active
-              </span>
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "1rem",
-                color: "var(--text-secondary)",
-                marginTop: "0.25rem",
-                fontSize: "0.9rem",
-              }}
-            >
-              <span>📅 {formattedDate}</span>
-              <span>📍 Grand Convention Hall</span>
-            </div>
-          </div>
-
-          <div
+              key={item}
+              className="skeleton"
+              style={{ height: "190px", width: "100%" }}
+            />
+          ))}
+        </div>
+      ) : error ? (
+        <div className="alert alert-error">
+          <div>{error}</div>
+        </div>
+      ) : events.length === 0 ? (
+        <div
+          className="card"
+          style={{
+            padding: "3rem 2rem",
+            textAlign: "center",
+          }}
+        >
+          <h2
             style={{
-              display: "flex",
-              gap: "0.75rem",
+              fontSize: "1.25rem",
+              fontWeight: 800,
+              marginBottom: "0.5rem",
             }}
           >
-            <Link
-              href={`/events/${eventId}`}
-              className="btn btn-dark"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <span>View Public Page</span>
+            No events found
+          </h2>
 
-              <svg
-                width="14"
-                height="14"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                />
-              </svg>
-            </Link>
+          <p
+            style={{
+              color: "var(--text-secondary)",
+              marginBottom: "1.5rem",
+            }}
+          >
+            Create your first event to start managing seats and bookings.
+          </p>
 
-            <button
-              className="btn btn-teal"
-              onClick={() => void loadAllData()}
-              disabled={loading}
-            >
-              <svg
-                width="16"
-                height="16"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                />
-              </svg>
-
-              <span>Refresh Data</span>
-            </button>
-          </div>
+          <Link href="/admin?create=true" className="btn btn-teal">
+            Create Event
+          </Link>
         </div>
-      </div>
-
-      <AnalyticsCards summary={summary} />
-
-      <div
-        style={{
-          borderBottom: "1px solid var(--border-card)",
-          display: "flex",
-          gap: "2rem",
-        }}
-      >
-        <button
-          onClick={() => setActiveTab("seats")}
-          style={{
-            background: "none",
-            border: "none",
-            padding: "0.75rem 0",
-            fontSize: "1rem",
-            fontWeight: 800,
-            color:
-              activeTab === "seats"
-                ? "var(--accent-teal-text)"
-                : "var(--text-secondary)",
-            borderBottom:
-              activeTab === "seats"
-                ? "3px solid var(--accent-teal)"
-                : "3px solid transparent",
-            cursor: "pointer",
-          }}
-        >
-          Seat Layout & Administrative Blocking
-        </button>
-
-        <button
-          onClick={() => setActiveTab("history")}
-          style={{
-            background: "none",
-            border: "none",
-            padding: "0.75rem 0",
-            fontSize: "1rem",
-            fontWeight: 800,
-            color:
-              activeTab === "history"
-                ? "var(--accent-teal-text)"
-                : "var(--text-secondary)",
-            borderBottom:
-              activeTab === "history"
-                ? "3px solid var(--accent-teal)"
-                : "3px solid transparent",
-            cursor: "pointer",
-          }}
-        >
-          Recent Confirmed Bookings (
-          {bookingHistory.total_bookings}
-          )
-        </button>
-      </div>
-
-      {activeTab === "seats" ? (
-        <AdminSeatGrid
-          eventId={eventDetail.id}
-          seats={eventDetail.seats}
-          totalRows={Number(eventDetail.total_rows)}
-          totalCols={Number(eventDetail.total_cols)}
-          onMutationSuccess={() => void loadAllData()}
-        />
       ) : (
-        <BookingHistoryTable history={bookingHistory} />
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+            gap: "1rem",
+          }}
+        >
+          {events.map((event) => (
+            <AdminEventCard key={event.id} event={event} />
+          ))}
+        </div>
       )}
     </div>
   );
