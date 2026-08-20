@@ -47,14 +47,9 @@ The core engineering objective is **preventing double-booking and race condition
 
 ---
 
-## 🔐 Default Admin Credentials
+## 🔐 Authentication & Access Control
 
-The backend automatically creates the `users` table and seeds the default administrator account on application startup:
-
-- **Admin Login URL**: `/admin/login`
-- **Email**: `admin@example.com`
-- **Password**: `adminpassword123`
-- **Role**: `ADMIN`
+The application implements Role-Based Access Control (RBAC). Administrative routes (`/admin`, `POST /events`, `PATCH /seats/block`, `DELETE /events/{id}`) require authentication with an `ADMIN` role account. Administrators can authenticate via `/admin/login` using JWT Bearer tokens.
 
 ---
 
@@ -240,7 +235,7 @@ npm run dev
 | **FastAPI Async Backend** | ✅ | OpenAPI Docs at `/docs` |
 | **MySQL 8 InnoDB** | ✅ | Row-level locking (`FOR UPDATE`) |
 | **Authentication & RBAC** | ✅ | JWT tokens + Protected `/admin` routes |
-| **Default Admin Seeding** | ✅ | Auto-seeded `admin@example.com` |
+| **Admin Route Security** | ✅ | Protected admin route guard & auth middleware |
 | **Interactive Seat Map** | ✅ | Touch panning + Status indicators |
 | **Multi-Seat Atomic Booking**| ✅ | Single transaction rollback |
 | **Double-Booking Protection**| ✅ | Verified by `test_concurrency.py` |
