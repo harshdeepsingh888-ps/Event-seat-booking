@@ -209,17 +209,22 @@ export default function EventSeatMapPage({ params }: PageProps) {
       <div>
         <Link
           href="/"
+          className="btn btn-outline"
           style={{
-            color: "var(--text-secondary)",
-            fontSize: "0.875rem",
-            textDecoration: "none",
             display: "inline-flex",
             alignItems: "center",
-            gap: "0.4rem",
-            marginBottom: "0.75rem",
+            gap: "0.6rem",
+            marginBottom: "1.25rem",
+            fontWeight: 800,
+            padding: "0.55rem 1.1rem",
+            fontSize: "0.875rem",
+            boxShadow: "0 2px 6px rgba(0, 0, 0, 0.04)",
           }}
         >
-          &larr; Back to Events Catalog
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          <span>Back to Events Catalog</span>
         </Link>
 
         <div
@@ -232,17 +237,18 @@ export default function EventSeatMapPage({ params }: PageProps) {
           }}
         >
           <div>
-            <h1 style={{ fontSize: "2.25rem", fontWeight: 700 }}>
+            <h1 style={{ fontSize: "2.25rem", fontWeight: 800, color: "var(--text-primary)" }}>
               {eventDetail.name}
             </h1>
 
             <p
               style={{
                 color: "var(--text-secondary)",
-                marginTop: "0.25rem",
+                marginTop: "0.35rem",
+                fontSize: "0.95rem",
               }}
             >
-              {formattedDate}
+              📅 {formattedDate}
             </p>
           </div>
 
@@ -381,111 +387,100 @@ export default function EventSeatMapPage({ params }: PageProps) {
       </div>
 
       {successBooking && (
-        <div
-          className="modal-overlay"
-          onClick={() => setSuccessBooking(null)}
-        >
-          <div
-            className="glass-panel modal-content"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div
-              className="alert alert-success"
-              style={{
-                flexDirection: "column",
-                gap: "0.75rem",
-                textAlign: "center",
-              }}
-            >
+        <div className="modal-overlay" onClick={() => setSuccessBooking(null)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "460px" }}>
+            <div style={{ textAlign: "center", display: "flex", flexDirection: "column", gap: "1.25rem" }}>
               <div
                 style={{
-                  width: 48,
-                  height: 48,
+                  width: "56px",
+                  height: "56px",
                   borderRadius: "50%",
-                  background: "rgba(16, 185, 129, 0.2)",
+                  background: "#ecfdf5",
+                  color: "#059669",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   margin: "0 auto",
                 }}
               >
-                <svg
-                  width="28"
-                  height="28"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M5 13l4 4L19 7"
-                  />
+                <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
                 </svg>
               </div>
 
-              <h3
-                style={{
-                  fontSize: "1.35rem",
-                  fontWeight: 700,
-                  color: "#fff",
-                }}
-              >
-                Booking Confirmed!
-              </h3>
-
-              <p
-                style={{
-                  fontSize: "0.9rem",
-                  color: "var(--text-secondary)",
-                }}
-              >
-                Thank you <strong>{successBooking.booker_name}</strong>! Your
-                seats have been successfully reserved.
-              </p>
+              <div>
+                <h3 style={{ fontSize: "1.35rem", fontWeight: 800, color: "var(--text-primary)" }}>
+                  Booking Confirmed!
+                </h3>
+                <p style={{ fontSize: "0.9rem", color: "var(--text-secondary)", marginTop: "0.35rem" }}>
+                  Thank you <strong>{successBooking.booker_name}</strong>! Your seats have been successfully reserved.
+                </p>
+              </div>
 
               <div
                 style={{
-                  background: "rgba(15, 23, 42, 0.8)",
-                  padding: "1rem",
-                  borderRadius: "8px",
+                  background: "#f8fafc",
+                  border: "1px solid var(--border-card)",
+                  padding: "1.25rem",
+                  borderRadius: "14px",
                   width: "100%",
                   textAlign: "left",
-                  fontSize: "0.85rem",
+                  fontSize: "0.875rem",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.75rem",
                 }}
               >
                 <div>
-                  Email: <strong>{successBooking.booker_email}</strong>
+                  <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase", fontWeight: 800, letterSpacing: "0.04em" }}>
+                    Email Address
+                  </span>
+                  <div style={{ color: "var(--text-primary)", fontWeight: 700, marginTop: "0.15rem" }}>
+                    {successBooking.booker_email}
+                  </div>
                 </div>
 
-                <div style={{ marginTop: "0.4rem" }}>
-                  Booked Seats:{" "}
-                  <strong
-                    style={{ color: "var(--seat-available-text)" }}
+                <div>
+                  <span style={{ fontSize: "0.75rem", color: "var(--accent-teal)", textTransform: "uppercase", fontWeight: 800, letterSpacing: "0.04em" }}>
+                    Confirmed Seats ({successBooking.seat_labels.length})
+                  </span>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem", marginTop: "0.25rem" }}>
+                    {successBooking.seat_labels.map((seat) => (
+                      <span key={seat} className="seat-pill" style={{ background: "#ccfbf1", color: "#0f766e" }}>
+                        {seat}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase", fontWeight: 800, letterSpacing: "0.04em" }}>
+                    Booking Reference IDs
+                  </span>
+                  <div
+                    style={{
+                      maxHeight: "80px",
+                      overflowY: "auto",
+                      background: "#ffffff",
+                      border: "1px solid #e2e8f0",
+                      padding: "0.5rem 0.75rem",
+                      borderRadius: "8px",
+                      fontFamily: "monospace",
+                      fontSize: "0.75rem",
+                      color: "var(--accent-teal)",
+                      marginTop: "0.25rem",
+                      lineHeight: "1.5",
+                    }}
                   >
-                    {successBooking.seat_labels.join(", ")}
-                  </strong>
-                </div>
-
-                <div
-                  style={{
-                    marginTop: "0.4rem",
-                    fontSize: "0.75rem",
-                    color: "var(--text-muted)",
-                  }}
-                >
-                  Booking Ref: {successBooking.booking_ids.join(", ")}
+                    {successBooking.booking_ids.join(", ")}
+                  </div>
                 </div>
               </div>
 
               <button
-                className="btn btn-primary"
+                className="btn btn-teal"
                 onClick={() => setSuccessBooking(null)}
-                style={{
-                  width: "100%",
-                  marginTop: "0.5rem",
-                }}
+                style={{ width: "100%", padding: "0.75rem", fontSize: "0.95rem" }}
               >
                 Done
               </button>
@@ -504,11 +499,60 @@ export default function EventSeatMapPage({ params }: PageProps) {
         onToggleSeat={handleToggleSeat}
       />
 
-      <BookingSummary
-        selectedSeats={selectedSeatsObj}
-        onProceed={() => setIsModalOpen(true)}
-        onClearSelection={handleClearSelection}
-      />
+      {eventDetail.available_seats === 0 ? (
+        <div
+          className="glass-panel"
+          style={{
+            padding: "2rem",
+            textAlign: "center",
+            background: "#fff1f2",
+            border: "1px solid #fecaca",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "1rem",
+          }}
+        >
+          <div
+            style={{
+              width: "48px",
+              height: "48px",
+              borderRadius: "50%",
+              background: "#ffe4e6",
+              color: "#e11d48",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+
+          <div>
+            <h3 style={{ fontSize: "1.25rem", fontWeight: 800, color: "#991b1b" }}>
+              ALL SEATS RESERVED
+            </h3>
+            <p style={{ color: "#991b1b", fontSize: "0.9rem", marginTop: "0.35rem" }}>
+              All seats for this event are currently booked or unavailable. Please check back later or explore other events in our catalog.
+            </p>
+          </div>
+
+          <Link href="/" className="btn btn-dark" style={{ marginTop: "0.5rem" }}>
+            <span>Explore Other Events</span>
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </Link>
+        </div>
+      ) : (
+        <BookingSummary
+          selectedSeats={selectedSeatsObj}
+          onProceed={() => setIsModalOpen(true)}
+          onClearSelection={handleClearSelection}
+        />
+      )}
 
       {isModalOpen && (
         <BookingFormModal
