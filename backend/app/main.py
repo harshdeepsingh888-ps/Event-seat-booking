@@ -3,13 +3,17 @@ from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select
 from app.core.config import settings
-from app.db.session import check_db_connection, AsyncSessionLocal
 from app.models.user import User
 from app.core.security import hash_password
 from app.api.v1.events import router as events_router
 from app.api.v1.auth import router as auth_router
+from app.models import Base
+from app.db.session import check_db_connection, AsyncSessionLocal, engine
 
 async def ensure_default_admin():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
     async with AsyncSessionLocal() as session:
         result = await session.execute(select(User).where(User.email == "admin@example.com"))
         admin = result.scalar_one_or_none()
