@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { Seat } from "@/types";
 import { api, ApiClientError } from "@/lib/api";
 
@@ -82,7 +82,7 @@ export default function AdminSeatGrid({
     } catch (err: unknown) {
       if (err instanceof ApiClientError && err.status === 409) {
         setErrorMsg(
-          "Conflict: One or more selected seats have already been booked by a user and cannot be blocked."
+          "This seat is no longer available for administrative blocking. Refresh the seat map and try again."
         );
       } else if (err instanceof ApiClientError) {
         setErrorMsg(err.message);
@@ -90,6 +90,7 @@ export default function AdminSeatGrid({
         setErrorMsg("Failed to update seat block status.");
       }
 
+      setSelectedSeatIds([]);
       onMutationSuccess();
     } finally {
       setLoading(false);

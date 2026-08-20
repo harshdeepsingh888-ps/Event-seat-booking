@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { Event } from "@/types";
 import { api, ApiClientError } from "@/lib/api";
 
@@ -29,7 +29,7 @@ export default function CreateEventModal({ onClose, onSuccess }: CreateEventModa
       return;
     }
 
-    if (!eventDate) {
+    if (!eventDate || isNaN(new Date(eventDate).getTime())) {
       setErrorMsg("Please select a valid event start date and time.");
       return;
     }
