@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
@@ -247,7 +247,7 @@ export default function EventSeatMapPage({ params }: PageProps) {
           </div>
 
           <button
-            className="btn btn-secondary"
+            className="btn btn-outline"
             onClick={() => void loadEventDetail()}
             disabled={loading}
           >
@@ -262,10 +262,10 @@ export default function EventSeatMapPage({ params }: PageProps) {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth="2"
-                d="M4 4v5h.582m15.3562A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
               />
             </svg>
-            Refresh Seat Map
+            <span>Refresh Seat Map</span>
           </button>
         </div>
       </div>
@@ -274,17 +274,19 @@ export default function EventSeatMapPage({ params }: PageProps) {
         className="glass-panel"
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-          gap: "1rem",
-          padding: "1.25rem",
+          gridTemplateColumns: "repeat(4, 1fr)",
+          gap: "1.25rem",
+          padding: "1.5rem",
         }}
       >
         <div>
           <div
             style={{
-              fontSize: "0.8rem",
+              fontSize: "0.75rem",
               color: "var(--text-muted)",
               textTransform: "uppercase",
+              fontWeight: 800,
+              letterSpacing: "0.04em",
             }}
           >
             Total Seats
@@ -292,9 +294,10 @@ export default function EventSeatMapPage({ params }: PageProps) {
 
           <div
             style={{
-              fontSize: "1.5rem",
-              fontWeight: 700,
+              fontSize: "1.65rem",
+              fontWeight: 800,
               color: "var(--text-primary)",
+              marginTop: "0.2rem",
             }}
           >
             {eventDetail.total_seats}
@@ -304,9 +307,11 @@ export default function EventSeatMapPage({ params }: PageProps) {
         <div>
           <div
             style={{
-              fontSize: "0.8rem",
-              color: "var(--seat-available-text)",
+              fontSize: "0.75rem",
+              color: "var(--accent-teal)",
               textTransform: "uppercase",
+              fontWeight: 800,
+              letterSpacing: "0.04em",
             }}
           >
             Available
@@ -314,9 +319,10 @@ export default function EventSeatMapPage({ params }: PageProps) {
 
           <div
             style={{
-              fontSize: "1.5rem",
-              fontWeight: 700,
-              color: "var(--seat-available-text)",
+              fontSize: "1.65rem",
+              fontWeight: 800,
+              color: "var(--accent-teal)",
+              marginTop: "0.2rem",
             }}
           >
             {eventDetail.available_seats}
@@ -326,9 +332,11 @@ export default function EventSeatMapPage({ params }: PageProps) {
         <div>
           <div
             style={{
-              fontSize: "0.8rem",
-              color: "var(--text-muted)",
+              fontSize: "0.75rem",
+              color: "#e11d48",
               textTransform: "uppercase",
+              fontWeight: 800,
+              letterSpacing: "0.04em",
             }}
           >
             Booked
@@ -336,9 +344,10 @@ export default function EventSeatMapPage({ params }: PageProps) {
 
           <div
             style={{
-              fontSize: "1.5rem",
-              fontWeight: 700,
-              color: "var(--text-muted)",
+              fontSize: "1.65rem",
+              fontWeight: 800,
+              color: "#e11d48",
+              marginTop: "0.2rem",
             }}
           >
             {eventDetail.booked_seats}
@@ -348,9 +357,11 @@ export default function EventSeatMapPage({ params }: PageProps) {
         <div>
           <div
             style={{
-              fontSize: "0.8rem",
-              color: "var(--seat-blocked-text)",
+              fontSize: "0.75rem",
+              color: "#d97706",
               textTransform: "uppercase",
+              fontWeight: 800,
+              letterSpacing: "0.04em",
             }}
           >
             Blocked
@@ -358,9 +369,10 @@ export default function EventSeatMapPage({ params }: PageProps) {
 
           <div
             style={{
-              fontSize: "1.5rem",
-              fontWeight: 700,
-              color: "var(--seat-blocked-text)",
+              fontSize: "1.65rem",
+              fontWeight: 800,
+              color: "#d97706",
+              marginTop: "0.2rem",
             }}
           >
             {eventDetail.blocked_seats}

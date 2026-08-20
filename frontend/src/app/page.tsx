@@ -209,7 +209,7 @@ export default function EventsCatalogPage() {
           style={{
             display: "grid",
             gridTemplateColumns:
-              "repeat(auto-fill, minmax(320px, 1fr))",
+              "repeat(auto-fill, minmax(300px, 1fr))",
             gap: "1.5rem",
           }}
         >
@@ -222,63 +222,43 @@ export default function EventsCatalogPage() {
                 color: "inherit",
               }}
             >
-              <article
-                className="card-panel"
-                style={{
-                  minHeight: "190px",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "space-between",
-                  cursor: "pointer",
-                }}
-              >
+              <article className="glass-panel event-card">
                 <div>
-                  <h2
-                    style={{
-                      color: "var(--text-primary)",
-                      fontSize: "1.2rem",
-                      fontWeight: 800,
-                    }}
-                  >
+                  <h2 className="event-title">
                     {event.name}
                   </h2>
 
-                  <p
-                    style={{
-                      color: "var(--text-secondary)",
-                      marginTop: "0.5rem",
-                      fontSize: "0.9rem",
-                    }}
-                  >
-                    {new Date(event.event_date).toLocaleString()}
-                  </p>
+                  <div className="event-meta">
+                    <div className="event-meta-item">
+                      <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <span>{new Date(event.event_date).toLocaleString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+                    </div>
+
+                    <div className="event-meta-item">
+                      <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                      </svg>
+                      <span>{Number(event.total_rows) * Number(event.total_cols)} Seats ({event.total_rows} × {event.total_cols} Layout)</span>
+                    </div>
+                  </div>
                 </div>
 
                 <div
                   style={{
-                    marginTop: "1.5rem",
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
                     gap: "1rem",
+                    marginTop: "0.5rem",
                   }}
                 >
-                  <span
-                    style={{
-                      color: "var(--text-muted)",
-                      fontSize: "0.8rem",
-                    }}
-                  >
-                    {event.total_rows} rows × {event.total_cols} columns
-                  </span>
-
-                  <span
-                    className="btn btn-teal"
-                    style={{
-                      pointerEvents: "none",
-                    }}
-                  >
-                    View Event
+                  <span className="btn btn-teal" style={{ width: "100%", pointerEvents: "none" }}>
+                    <span>Select Seats & Book</span>
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                    </svg>
                   </span>
                 </div>
               </article>

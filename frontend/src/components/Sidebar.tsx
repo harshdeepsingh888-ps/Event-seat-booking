@@ -21,7 +21,8 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
     if (onClose) {
       onClose();
     }
-  }, [pathname, onClose]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
 
   return (
     <>
