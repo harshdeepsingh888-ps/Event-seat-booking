@@ -1,6 +1,6 @@
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
 from app.models.user import User
 from app.schemas.auth import UserCreate, LoginRequest, TokenResponse, UserResponse
 from app.core.security import hash_password, verify_password, create_access_token
@@ -8,7 +8,8 @@ from app.core.security import hash_password, verify_password, create_access_toke
 class AuthService:
     @staticmethod
     async def register_user(db: AsyncSession, payload: UserCreate) -> UserResponse:
-        stmt = select(User).where(User.email == payload.email)
+        clean_email = payload.email.strip().lower()
+        stmt = select(User).where(func.lower(User.email) == clean_email)
         result = await db.execute(stmt)
         existing = result.scalar_one_or_none()
         if existing:
@@ -19,9 +20,9 @@ class AuthService:
 
         hashed_pwd = hash_password(payload.password)
         user = User(
-            email=payload.email,
+            email=clean_email,
             hashed_password=hashed_pwd,
-            full_name=payload.full_name,
+            full_name=payload.full_name.strip(),
             role=payload.role.upper() if payload.role else "USER"
         )
         db.add(user)
@@ -38,7 +39,8 @@ class AuthService:
 
     @staticmethod
     async def login_user(db: AsyncSession, payload: LoginRequest) -> TokenResponse:
-        stmt = select(User).where(User.email == payload.email)
+        clean_email = payload.email.strip().lower()
+        stmt = select(User).where(func.lower(User.email) == clean_email)
         result = await db.execute(stmt)
         user = result.scalar_one_or_none()
 
