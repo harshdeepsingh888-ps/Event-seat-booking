@@ -106,9 +106,10 @@ function AdminContent() {
         style={{
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "flex-start",
-          gap: "1rem",
+          alignItems: "center",
+          gap: "1.25rem",
           flexWrap: "wrap",
+          paddingBottom: "0.5rem",
         }}
       >
         <div>
@@ -116,18 +117,21 @@ function AdminContent() {
             style={{
               fontSize: "0.8rem",
               color: "var(--text-muted)",
-              fontWeight: 700,
+              fontWeight: 800,
+              letterSpacing: "0.04em",
+              textTransform: "uppercase",
               marginBottom: "0.35rem",
             }}
           >
-            Operations &gt; Events
+            Operations / Operations Console
           </div>
 
           <h1
             style={{
-              fontSize: "2rem",
+              fontSize: "2.25rem",
               fontWeight: 800,
               color: "var(--text-primary)",
+              letterSpacing: "-0.03em",
               margin: 0,
             }}
           >
@@ -137,27 +141,34 @@ function AdminContent() {
           <p
             style={{
               color: "var(--text-secondary)",
-              marginTop: "0.4rem",
+              marginTop: "0.5rem",
+              fontSize: "0.95rem",
             }}
           >
             Signed in as <strong>{user.full_name}</strong> ({user.email})
           </p>
         </div>
 
-        <div style={{ display: "flex", gap: "0.75rem" }}>
+        <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
           <button
             className="btn btn-outline"
             onClick={() => void loadEvents()}
             disabled={loading}
           >
-            Refresh
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            <span>Refresh</span>
           </button>
 
           <button
             className="btn btn-teal"
             onClick={() => setIsCreateModalOpen(true)}
           >
-            Create Event
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+            </svg>
+            <span>Create Event</span>
           </button>
 
           <button
@@ -167,7 +178,7 @@ function AdminContent() {
               router.push("/admin/login");
             }}
           >
-            Sign Out
+            <span>Sign Out</span>
           </button>
         </div>
       </div>
@@ -176,15 +187,15 @@ function AdminContent() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-            gap: "1rem",
+            gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+            gap: "1.75rem",
           }}
         >
           {[1, 2, 3].map((item) => (
             <div
               key={item}
-              className="skeleton"
-              style={{ height: "190px", width: "100%" }}
+              className="glass-panel skeleton"
+              style={{ height: "220px", width: "100%" }}
             />
           ))}
         </div>
@@ -194,17 +205,18 @@ function AdminContent() {
         </div>
       ) : events.length === 0 ? (
         <div
-          className="card"
+          className="glass-panel"
           style={{
-            padding: "3rem 2rem",
+            padding: "4rem 2rem",
             textAlign: "center",
           }}
         >
           <h2
             style={{
-              fontSize: "1.25rem",
+              fontSize: "1.5rem",
               fontWeight: 800,
-              marginBottom: "0.5rem",
+              marginBottom: "0.75rem",
+              color: "var(--text-primary)",
             }}
           >
             No events found
@@ -213,25 +225,30 @@ function AdminContent() {
           <p
             style={{
               color: "var(--text-secondary)",
-              marginBottom: "1.5rem",
+              marginBottom: "2rem",
+              maxWidth: "460px",
+              marginInline: "auto",
             }}
           >
-            Create your first event to start managing seats and bookings.
+            Create your first event to start managing seat inventories, administrative blocking, and reservation history.
           </p>
 
           <button
             className="btn btn-teal"
             onClick={() => setIsCreateModalOpen(true)}
           >
-            Create Event
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+            </svg>
+            <span>Create Event</span>
           </button>
         </div>
       ) : (
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-            gap: "1rem",
+            gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+            gap: "1.75rem",
           }}
         >
           {events.map((event) => (

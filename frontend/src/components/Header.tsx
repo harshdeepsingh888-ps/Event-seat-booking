@@ -3,7 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-export default function Header() {
+interface HeaderProps {
+  onToggleSidebar?: () => void;
+}
+
+export default function Header({ onToggleSidebar }: HeaderProps) {
   const pathname = usePathname();
 
   const isAdmin = pathname.startsWith("/admin");
@@ -11,6 +15,14 @@ export default function Header() {
   return (
     <header className="viewport-header">
       <div className="header-context">
+        {onToggleSidebar && (
+          <button className="mobile-menu-toggle" onClick={onToggleSidebar} aria-label="Toggle navigation menu">
+            <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        )}
+
         <Link href="/" className="header-mobile-brand">
           <div className="header-brand-mark">
             <svg

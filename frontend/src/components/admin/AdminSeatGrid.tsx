@@ -14,7 +14,6 @@ export default function AdminSeatGrid({
   eventId,
   seats,
   totalRows,
-  totalCols,
   onMutationSuccess,
 }: AdminSeatGridProps) {
   const [selectedSeatIds, setSelectedSeatIds] = useState<string[]>([]);
@@ -116,39 +115,33 @@ export default function AdminSeatGrid({
       <div
         className="glass-panel"
         style={{
-          padding: "1rem 1.5rem",
+          padding: "1.25rem 1.75rem",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           flexWrap: "wrap",
-          gap: "1rem",
+          gap: "1.25rem",
         }}
       >
         <div>
-          <span style={{ fontWeight: 700, fontSize: "1rem" }}>
+          <span style={{ fontWeight: 800, fontSize: "1.05rem", color: "var(--text-primary)" }}>
             Admin Seat Selection ({selectedSeatIds.length} Selected)
           </span>
 
           <div
             style={{
-              fontSize: "0.8rem",
+              fontSize: "0.85rem",
               color: "var(--text-secondary)",
-              marginTop: "0.2rem",
+              marginTop: "0.25rem",
             }}
           >
-            Select Available seats to block, or Blocked seats to unblock. Booked seats are
-            strictly disabled.
+            Select Available seats to block, or Blocked seats to unblock. Booked seats are strictly disabled.
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: "0.75rem" }}>
+        <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
           <button
-            className="btn"
-            style={{
-              background: "rgba(239, 68, 68, 0.2)",
-              border: "1px solid rgba(239, 68, 68, 0.4)",
-              color: "#f87171",
-            }}
+            className="btn btn-amber"
             onClick={() => handleBlockUnblock(true)}
             disabled={loading || availableToBlock.length === 0}
           >
@@ -156,7 +149,7 @@ export default function AdminSeatGrid({
           </button>
 
           <button
-            className="btn btn-secondary"
+            className="btn btn-teal"
             onClick={() => handleBlockUnblock(false)}
             disabled={loading || blockedToUnblock.length === 0}
           >
@@ -165,63 +158,59 @@ export default function AdminSeatGrid({
         </div>
       </div>
 
-      <div className="seat-map-wrapper">
-        <div className="stage-banner">STAGE / FRONT</div>
+      <div className="glass-panel" style={{ padding: "2rem 1.5rem" }}>
+        <div className="stage-pill">STAGE / SCREEN FRONT</div>
 
-        <div
-          className="glass-panel seat-grid-container"
-          style={{
-            gridTemplateColumns: `repeat(${totalCols}, minmax(42px, 1fr))`,
-          }}
-        >
-          {Array.from(rowsMap.entries()).map(([rowNum, rowSeats]) => {
-            rowSeats.sort((a, b) => a.column_number - b.column_number);
+        <div className="seat-grid-scroll-wrapper">
+          <div className="seat-grid-container">
+            {Array.from(rowsMap.entries()).map(([rowNum, rowSeats]) => {
+              rowSeats.sort((a, b) => a.column_number - b.column_number);
+              const rowLabelStr = getRowLabel(rowSeats, rowNum);
 
-            const rowLabelStr = getRowLabel(rowSeats, rowNum);
+              return (
+                <div key={rowNum} className="seat-row">
+                  <span className="row-label">{rowLabelStr}</span>
 
-            return (
-              <div key={rowNum} className="seat-row">
-                <span className="row-label">{rowLabelStr}</span>
+                  {rowSeats.map((seat) => {
+                    const isSelected = selectedSet.has(seat.id);
+                    const isBooked = seat.status === "BOOKED";
 
-                {rowSeats.map((seat) => {
-                  const isSelected = selectedSet.has(seat.id);
-                  const isBooked = seat.status === "BOOKED";
+                    let statusClass = "seat-available";
+                    let ariaText = `Seat ${seat.seat_label} - Available (Click to select for blocking)`;
 
-                  let statusClass = "seat-available";
-                  let ariaText = `Seat ${seat.seat_label} - Available (Click to select for blocking)`;
+                    if (seat.status === "BLOCKED") {
+                      statusClass = "seat-blocked";
+                      ariaText = `Seat ${seat.seat_label} - Blocked (Click to select for unblocking)`;
+                    } else if (isBooked) {
+                      statusClass = "seat-booked";
+                      ariaText = `Seat ${seat.seat_label} - BOOKED by user (Cannot be modified)`;
+                    }
 
-                  if (seat.status === "BLOCKED") {
-                    statusClass = "seat-blocked";
-                    ariaText = `Seat ${seat.seat_label} - Blocked (Click to select for unblocking)`;
-                  } else if (isBooked) {
-                    statusClass = "seat-booked";
-                    ariaText = `Seat ${seat.seat_label} - BOOKED by user (Cannot be modified)`;
-                  }
+                    if (isSelected) {
+                      statusClass = "seat-selected";
+                    }
 
-                  if (isSelected) {
-                    statusClass = "seat-selected";
-                  }
+                    return (
+                      <button
+                        key={seat.id}
+                        type="button"
+                        className={`seat-button ${statusClass}`}
+                        onClick={() => handleToggleSeat(seat)}
+                        disabled={isBooked || loading}
+                        title={ariaText}
+                        aria-label={ariaText}
+                        aria-pressed={isSelected}
+                      >
+                        {seat.column_number}
+                      </button>
+                    );
+                  })}
 
-                  return (
-                    <button
-                      key={seat.id}
-                      type="button"
-                      className={`seat-button ${statusClass}`}
-                      onClick={() => handleToggleSeat(seat)}
-                      disabled={isBooked || loading}
-                      title={ariaText}
-                      aria-label={ariaText}
-                      aria-pressed={isSelected}
-                    >
-                      {seat.column_number}
-                    </button>
-                  );
-                })}
-
-                <span className="row-label">{rowLabelStr}</span>
-              </div>
-            );
-          })}
+                  <span className="row-label">{rowLabelStr}</span>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>

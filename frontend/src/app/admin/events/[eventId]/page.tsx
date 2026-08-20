@@ -218,20 +218,22 @@ export default function AdminEventDetailPage({ params }: PageProps) {
           style={{
             fontSize: "0.8rem",
             color: "var(--text-muted)",
-            fontWeight: 700,
-            marginBottom: "0.3rem",
+            fontWeight: 800,
+            letterSpacing: "0.04em",
+            textTransform: "uppercase",
+            marginBottom: "0.35rem",
           }}
         >
-          Dashboard &gt; Events &gt; {eventDetail.name}
+          Operations / Events / {eventDetail.name}
         </div>
 
         <div
           style={{
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "flex-start",
+            alignItems: "center",
             flexWrap: "wrap",
-            gap: "1rem",
+            gap: "1.25rem",
           }}
         >
           <div>
@@ -239,14 +241,17 @@ export default function AdminEventDetailPage({ params }: PageProps) {
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "0.75rem",
+                gap: "0.85rem",
+                flexWrap: "wrap",
               }}
             >
               <h1
                 style={{
-                  fontSize: "2rem",
+                  fontSize: "2.25rem",
                   fontWeight: 800,
                   color: "var(--text-primary)",
+                  letterSpacing: "-0.03em",
+                  margin: 0,
                 }}
               >
                 {eventDetail.name}
@@ -262,10 +267,11 @@ export default function AdminEventDetailPage({ params }: PageProps) {
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "1rem",
+                gap: "1.25rem",
                 color: "var(--text-secondary)",
-                marginTop: "0.25rem",
-                fontSize: "0.9rem",
+                marginTop: "0.4rem",
+                fontSize: "0.95rem",
+                flexWrap: "wrap",
               }}
             >
               <span>📅 {formattedDate}</span>
@@ -273,7 +279,7 @@ export default function AdminEventDetailPage({ params }: PageProps) {
             </div>
           </div>
 
-          <div style={{ display: "flex", gap: "0.75rem" }}>
+          <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
             <Link
               href={`/events/${eventId}`}
               className="btn btn-dark"
@@ -281,7 +287,6 @@ export default function AdminEventDetailPage({ params }: PageProps) {
               rel="noopener noreferrer"
             >
               <span>View Public Page</span>
-
               <svg
                 width="14"
                 height="14"
@@ -317,7 +322,6 @@ export default function AdminEventDetailPage({ params }: PageProps) {
                   d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                 />
               </svg>
-
               <span>Refresh Data</span>
             </button>
 

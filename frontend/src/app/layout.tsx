@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import Sidebar from "@/components/Sidebar";
-import Header from "@/components/Header";
+import AppShell from "@/components/AppShell";
 import { AuthProvider } from "@/context/AuthContext";
 import "./globals.css";
 
@@ -18,15 +17,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AuthProvider>
-          <div className="app-shell">
-            <Sidebar />
-            <div className="main-viewport">
-              <Header />
-              <main className="content-container">
-                {children}
-              </main>
-            </div>
-          </div>
+          <AppShell>{children}</AppShell>
         </AuthProvider>
       </body>
     </html>

@@ -7,9 +7,9 @@ interface BookingHistoryTableProps {
 export default function BookingHistoryTable({ history }: BookingHistoryTableProps) {
   if (history.total_bookings === 0) {
     return (
-      <div className="glass-panel" style={{ padding: "2.5rem", textAlign: "center" }}>
-        <h4 style={{ fontSize: "1.1rem", color: "var(--text-secondary)" }}>No Booking History Recorded</h4>
-        <p style={{ color: "var(--text-muted)", fontSize: "0.875rem", marginTop: "0.4rem" }}>
+      <div className="glass-panel" style={{ padding: "3rem 2rem", textAlign: "center" }}>
+        <h4 style={{ fontSize: "1.25rem", fontWeight: 800, color: "var(--text-primary)" }}>No Booking History Recorded</h4>
+        <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem", marginTop: "0.5rem" }}>
           No user reservations have been confirmed for this event yet.
         </p>
       </div>
@@ -17,23 +17,23 @@ export default function BookingHistoryTable({ history }: BookingHistoryTableProp
   }
 
   return (
-    <div className="glass-panel" style={{ overflow: "hidden" }}>
-      <div style={{ padding: "1.25rem 1.5rem", borderBottom: "1px solid var(--border-subtle)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h3 style={{ fontSize: "1.1rem", fontWeight: 700 }}>
+    <div className="glass-panel" style={{ padding: 0, overflow: "hidden" }}>
+      <div style={{ padding: "1.25rem 1.75rem", borderBottom: "1px solid var(--border-card)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <h3 style={{ fontSize: "1.15rem", fontWeight: 800, color: "var(--text-primary)" }}>
           Confirmed Booking Log ({history.total_bookings} {history.total_bookings === 1 ? "Transaction" : "Transactions"})
         </h3>
-        <span style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>Ordered Newest First</span>
+        <span style={{ fontSize: "0.8rem", color: "var(--text-muted)", fontWeight: 700 }}>Ordered Newest First</span>
       </div>
 
-      <div style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "0.9rem" }}>
+      <div className="table-responsive">
+        <table className="custom-table">
           <thead>
-            <tr style={{ background: "rgba(15, 23, 42, 0.6)", color: "var(--text-secondary)", borderBottom: "1px solid var(--border-subtle)" }}>
-              <th style={{ padding: "0.75rem 1.5rem", fontWeight: 600 }}>Booking Ref</th>
-              <th style={{ padding: "0.75rem 1.5rem", fontWeight: 600 }}>Booker Name</th>
-              <th style={{ padding: "0.75rem 1.5rem", fontWeight: 600 }}>Email Address</th>
-              <th style={{ padding: "0.75rem 1.5rem", fontWeight: 600 }}>Seats</th>
-              <th style={{ padding: "0.75rem 1.5rem", fontWeight: 600 }}>Timestamp</th>
+            <tr>
+              <th>Booking Ref</th>
+              <th>Booker Name</th>
+              <th>Email Address</th>
+              <th>Seats</th>
+              <th>Timestamp</th>
             </tr>
           </thead>
           <tbody>
@@ -48,38 +48,24 @@ export default function BookingHistoryTable({ history }: BookingHistoryTableProp
               });
 
               return (
-                <tr
-                  key={item.booking_id || idx}
-                  style={{
-                    borderBottom: "1px solid var(--border-subtle)",
-                    transition: "background 0.15s ease",
-                  }}
-                  className="table-row"
-                >
-                  <td style={{ padding: "0.85rem 1.5rem", fontFamily: "monospace", fontSize: "0.8rem", color: "var(--accent-primary)" }}>
+                <tr key={item.booking_id || idx}>
+                  <td style={{ fontFamily: "monospace", fontSize: "0.85rem", fontWeight: 700, color: "var(--accent-teal)" }}>
                     {item.booking_id.slice(0, 8)}...
                   </td>
-                  <td style={{ padding: "0.85rem 1.5rem", fontWeight: 600, color: "var(--text-primary)" }}>
+                  <td style={{ fontWeight: 700, color: "var(--text-primary)" }}>
                     {item.booker_name}
                   </td>
-                  <td style={{ padding: "0.85rem 1.5rem", color: "var(--text-secondary)" }}>
+                  <td style={{ color: "var(--text-secondary)" }}>
                     {item.booker_email}
                   </td>
-                  <td style={{ padding: "0.85rem 1.5rem" }}>
-                    <span
-                      style={{
-                        background: "rgba(16, 185, 129, 0.12)",
-                        color: "var(--seat-available-text)",
-                        padding: "0.2rem 0.6rem",
-                        borderRadius: "4px",
-                        fontWeight: 700,
-                        fontSize: "0.85rem",
-                      }}
-                    >
-                      {item.seat_labels.join(", ")}
-                    </span>
+                  <td>
+                    {item.seat_labels.map((seat) => (
+                      <span key={seat} className="seat-pill">
+                        {seat}
+                      </span>
+                    ))}
                   </td>
-                  <td style={{ padding: "0.85rem 1.5rem", color: "var(--text-muted)", fontSize: "0.85rem" }}>
+                  <td style={{ color: "var(--text-muted)", fontSize: "0.85rem" }}>
                     {formattedDate}
                   </td>
                 </tr>
