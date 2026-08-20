@@ -226,3 +226,16 @@ class EventService:
             total_revenue=0.0
         )
 
+    @staticmethod
+    async def delete_event(db: AsyncSession, event_id: str) -> bool:
+        """Deletes event and cascades deletion to all associated seats and bookings."""
+        event_res = await db.execute(select(Event).where(Event.id == event_id))
+        event = event_res.scalar_one_or_none()
+        if not event:
+            return False
+
+        await db.delete(event)
+        await db.commit()
+        return True
+
+

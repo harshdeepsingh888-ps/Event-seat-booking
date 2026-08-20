@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
@@ -8,6 +8,8 @@ import {
   EventDetail,
   EventSummary,
 } from "@/types";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import AnalyticsCards from "@/components/admin/AnalyticsCards";
 import AdminSeatGrid from "@/components/admin/AdminSeatGrid";
 import BookingHistoryTable from "@/components/admin/BookingHistoryTable";
@@ -17,6 +19,9 @@ interface PageProps {
 }
 
 export default function AdminEventDetailPage({ params }: PageProps) {
+  const router = useRouter();
+  const { user, isLoading: isAuthLoading, isAdmin } = useAuth();
+
   const resolvedParams = use(params);
   const eventId = resolvedParams.eventId;
 
@@ -27,6 +32,30 @@ export default function AdminEventDetailPage({ params }: PageProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"seats" | "history">("seats");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  const handleDeleteEvent = async () => {
+    setIsDeleting(true);
+    try {
+      await api.deleteEvent(eventId);
+      router.push("/admin");
+    } catch (err: unknown) {
+      setError(
+        err instanceof ApiClientError
+          ? err.message
+          : "Failed to delete event."
+      );
+      setIsDeleting(false);
+      setShowDeleteModal(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!isAuthLoading && (!user || !isAdmin)) {
+      router.push("/admin/login");
+    }
+  }, [isAuthLoading, user, isAdmin, router]);
 
   const loadAllData = async () => {
     setLoading(true);
@@ -56,6 +85,8 @@ export default function AdminEventDetailPage({ params }: PageProps) {
 
   useEffect(() => {
     let cancelled = false;
+
+    if (!user || !isAdmin) return;
 
     const fetchAdminEventData = async () => {
       setLoading(true);
@@ -98,7 +129,15 @@ export default function AdminEventDetailPage({ params }: PageProps) {
     return () => {
       cancelled = true;
     };
-  }, [eventId]);
+  }, [eventId, user, isAdmin]);
+
+  if (isAuthLoading || !user || !isAdmin) {
+    return (
+      <div style={{ padding: "2rem", textAlign: "center" }}>
+        Checking authorization...
+      </div>
+    );
+  }
 
   if (loading && !eventDetail) {
     return (
@@ -281,6 +320,28 @@ export default function AdminEventDetailPage({ params }: PageProps) {
 
               <span>Refresh Data</span>
             </button>
+
+            <button
+              className="btn btn-red"
+              onClick={() => setShowDeleteModal(true)}
+              disabled={loading || isDeleting}
+            >
+              <svg
+                width="16"
+                height="16"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
+              </svg>
+              <span>Delete Event</span>
+            </button>
           </div>
         </div>
       </div>
@@ -349,6 +410,55 @@ export default function AdminEventDetailPage({ params }: PageProps) {
         />
       ) : (
         <BookingHistoryTable history={bookingHistory} />
+      )}
+
+      {showDeleteModal && (
+        <div className="modal-backdrop">
+          <div className="modal-card" style={{ maxWidth: "450px" }}>
+            <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
+              <div
+                style={{
+                  width: "48px",
+                  height: "48px",
+                  borderRadius: "50%",
+                  background: "#fef2f2",
+                  color: "#dc2626",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "0 auto 1rem",
+                }}
+              >
+                <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <h2 style={{ fontSize: "1.25rem", fontWeight: 800, color: "var(--text-primary)" }}>
+                Delete &quot;{eventDetail.name}&quot;?
+              </h2>
+              <p style={{ color: "var(--text-secondary)", fontSize: "0.875rem", marginTop: "0.5rem" }}>
+                This action is permanent. The event, seat grid layout, and all associated booking records will be permanently deleted from the database.
+              </p>
+            </div>
+
+            <div style={{ display: "flex", gap: "0.75rem", justifyContent: "flex-end" }}>
+              <button
+                className="btn btn-outline"
+                onClick={() => setShowDeleteModal(false)}
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn btn-red"
+                onClick={() => void handleDeleteEvent()}
+                disabled={isDeleting}
+              >
+                {isDeleting ? "Deleting..." : "Confirm & Delete Event"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

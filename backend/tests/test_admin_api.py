@@ -9,7 +9,7 @@ from sqlalchemy import event, text
 
 from app.main import app
 from app.models import Base, Event, Seat, Booking
-from app.api.v1.events import get_db
+from app.db.session import get_db
 
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
@@ -45,10 +45,28 @@ async def test_session():
     await engine.dispose()
 
 
+from app.models.user import User
+from app.core.security import hash_password, create_access_token
+
+async def get_admin_headers(session: AsyncSession) -> dict[str, str]:
+    admin_user = User(
+        id=str(uuid.uuid4()),
+        email=f"admin_{uuid.uuid4()}@test.com",
+        hashed_password=hash_password("admin123"),
+        full_name="Admin Test",
+        role="ADMIN"
+    )
+    session.add(admin_user)
+    await session.commit()
+    token = create_access_token(subject=admin_user.id, role="ADMIN")
+    return {"Authorization": f"Bearer {token}"}
+
+
 @pytest.mark.asyncio
 async def test_summary_empty_event(test_session: AsyncSession):
     """Event with 6 seats, 0 booked, 0 blocked -> 100% available, 0% occupancy."""
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+    headers = await get_admin_headers(test_session)
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=headers) as client:
         # Create 2x3 event
         create_res = await client.post(
             "/api/v1/events",
@@ -73,7 +91,8 @@ async def test_summary_empty_event(test_session: AsyncSession):
 @pytest.mark.asyncio
 async def test_summary_blocked_seats(test_session: AsyncSession):
     """Event with 6 seats where 2 seats are blocked."""
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+    headers = await get_admin_headers(test_session)
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=headers) as client:
         create_res = await client.post(
             "/api/v1/events",
             json={"name": "Blocked Show", "event_date": "2026-09-01T18:00:00Z", "total_rows": 2, "total_cols": 3}
@@ -101,7 +120,8 @@ async def test_summary_blocked_seats(test_session: AsyncSession):
 @pytest.mark.asyncio
 async def test_summary_booked_seats(test_session: AsyncSession):
     """Event with 6 seats where 2 seats are booked -> 33.33% occupancy."""
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+    headers = await get_admin_headers(test_session)
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=headers) as client:
         create_res = await client.post(
             "/api/v1/events",
             json={"name": "Booked Show", "event_date": "2026-09-01T18:00:00Z", "total_rows": 2, "total_cols": 3}
@@ -131,7 +151,8 @@ async def test_summary_booked_seats(test_session: AsyncSession):
 @pytest.mark.asyncio
 async def test_summary_mixed_state(test_session: AsyncSession):
     """2 booked + 1 blocked + 3 available == 6 total."""
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+    headers = await get_admin_headers(test_session)
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=headers) as client:
         create_res = await client.post(
             "/api/v1/events",
             json={"name": "Mixed Show", "event_date": "2026-09-01T18:00:00Z", "total_rows": 2, "total_cols": 3}
@@ -165,7 +186,8 @@ async def test_summary_mixed_state(test_session: AsyncSession):
 async def test_summary_nonexistent_event(test_session: AsyncSession):
     """Invalid event_id summary request MUST return 404 Not Found."""
     fake_id = str(uuid.uuid4())
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+    headers = await get_admin_headers(test_session)
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=headers) as client:
         res = await client.get(f"/api/v1/events/{fake_id}/summary")
         assert res.status_code == 404
 
@@ -173,7 +195,8 @@ async def test_summary_nonexistent_event(test_session: AsyncSession):
 @pytest.mark.asyncio
 async def test_booking_history_multi_seat_grouping(test_session: AsyncSession):
     """Booking 1 (A1, A2) and Booking 2 (B1) MUST be represented as 2 distinct grouped history items."""
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+    headers = await get_admin_headers(test_session)
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=headers) as client:
         create_res = await client.post(
             "/api/v1/events",
             json={"name": "History Show", "event_date": "2026-09-01T18:00:00Z", "total_rows": 2, "total_cols": 3}
@@ -217,7 +240,8 @@ async def test_booking_history_multi_seat_grouping(test_session: AsyncSession):
 @pytest.mark.asyncio
 async def test_booking_history_ordering(test_session: AsyncSession):
     """Booking history MUST be ordered newest first (created_at DESC)."""
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+    headers = await get_admin_headers(test_session)
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=headers) as client:
         create_res = await client.post(
             "/api/v1/events",
             json={"name": "Order Show", "event_date": "2026-09-01T18:00:00Z", "total_rows": 1, "total_cols": 3}
@@ -253,7 +277,8 @@ async def test_booking_history_ordering(test_session: AsyncSession):
 @pytest.mark.asyncio
 async def test_booking_history_empty_event(test_session: AsyncSession):
     """Event with no bookings MUST return 200 OK with bookings: []."""
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+    headers = await get_admin_headers(test_session)
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=headers) as client:
         create_res = await client.post(
             "/api/v1/events",
             json={"name": "No Bookings Show", "event_date": "2026-09-01T18:00:00Z", "total_rows": 1, "total_cols": 2}
@@ -272,6 +297,41 @@ async def test_booking_history_empty_event(test_session: AsyncSession):
 async def test_booking_history_nonexistent_event(test_session: AsyncSession):
     """Invalid event_id booking history request MUST return 404 Not Found."""
     fake_id = str(uuid.uuid4())
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+    headers = await get_admin_headers(test_session)
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=headers) as client:
         res = await client.get(f"/api/v1/events/{fake_id}/bookings")
         assert res.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_delete_event_success_and_protection(test_session: AsyncSession):
+    """Admin MUST be able to delete an event, unauthenticated/non-admin rejected, nonexistent returns 404."""
+    admin_headers = await get_admin_headers(test_session)
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=admin_headers) as client:
+        # Create event
+        create_res = await client.post(
+            "/api/v1/events",
+            json={"name": "Event to Delete", "event_date": "2026-09-01T18:00:00Z", "total_rows": 2, "total_cols": 2}
+        )
+        assert create_res.status_code == 201
+        event_id = create_res.json()["id"]
+
+    # 1. Unauthenticated delete attempt -> 401
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        unauth_del = await client.delete(f"/api/v1/events/{event_id}")
+        assert unauth_del.status_code == 401
+
+    # 2. Admin delete attempt -> 204
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=admin_headers) as client:
+        del_res = await client.delete(f"/api/v1/events/{event_id}")
+        assert del_res.status_code == 204
+
+        # Verify event no longer exists
+        get_res = await client.get(f"/api/v1/events/{event_id}")
+        assert get_res.status_code == 404
+
+        # Subsequent delete on missing event -> 404
+        del_again = await client.delete(f"/api/v1/events/{event_id}")
+        assert del_again.status_code == 404
+
+

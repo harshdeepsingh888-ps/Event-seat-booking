@@ -75,3 +75,23 @@ export interface BookingHistoryResponse {
   bookings: BookingHistoryItem[];
 }
 
+export interface User {
+  id: string;
+  email: string;
+  full_name: string;
+  role: "ADMIN" | "USER";
+  created_at: string;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface TokenResponse {
+  access_token: string;
+  token_type: string;
+  user: User;
+}
+
+

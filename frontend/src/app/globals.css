@@ -9,10 +9,10 @@
   --border-card: #e2e8f0;
   --border-subtle: #f1f5f9;
 
-  /* Typography Colors */
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
+  /* Typography Colors - High Contrast & Crisp */
+  --text-primary: #020617;
+  --text-secondary: #334155;
+  --text-muted: #475569;
   --text-inverse: #ffffff;
 
   /* Premium Non-Cliché Accent Palette */
@@ -129,7 +129,7 @@ body {
   align-items: center;
   gap: 0.75rem;
   padding: 0.65rem 0.85rem;
-  color: #94a3b8;
+  color: #cbd5e1;
   text-decoration: none;
   font-size: 0.875rem;
   font-weight: 600;
@@ -346,6 +346,19 @@ body {
   background-color: var(--accent-amber-hover);
   transform: translateY(-1px);
 }
+
+.btn-red {
+  background-color: #dc2626;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+}
+
+.btn-red:hover {
+  background-color: #b91c1c;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(220, 38, 38, 0.35);
+}
+
 
 .btn-dark {
   background-color: #0f172a;
@@ -652,4 +665,23 @@ body {
 .form-input:focus {
   border-color: var(--accent-teal);
   box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.18);
+}
+
+
+@media (max-width: 768px) {
+  .header-mobile-brand {
+    display: inline-flex;
+  }
+
+  .header-page-context {
+    display: none;
+  }
+
+  .header-mode-badge {
+    padding: 0.4rem 0.55rem;
+  }
+
+  .sidebar-scope {
+    display: none;
+  }
 }

@@ -5,6 +5,9 @@ import {
   BookingRequest,
   BookingResponse,
   BookingHistoryResponse,
+  LoginRequest,
+  TokenResponse,
+  User,
 } from "@/types";
 
 const API_BASE_URL =
@@ -33,6 +36,21 @@ export class ApiClientError extends Error {
     this.status = status;
     this.data = data ?? null;
   }
+}
+
+function getAuthHeaders(): Record<string, string> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
+  if (typeof window !== "undefined") {
+    const token = localStorage.getItem("token");
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+  }
+
+  return headers;
 }
 
 async function parseErrorResponse(
@@ -81,10 +99,29 @@ async function handleResponse<T>(res: Response): Promise<T> {
 }
 
 export const api = {
+  async login(payload: LoginRequest): Promise<TokenResponse> {
+    const res = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    return handleResponse<TokenResponse>(res);
+  },
+
+  async getMe(): Promise<User> {
+    const res = await fetch(`${API_BASE_URL}/api/v1/auth/me`, {
+      headers: getAuthHeaders(),
+      cache: "no-store",
+    });
+
+    return handleResponse<User>(res);
+  },
+
   async getEvents(): Promise<Event[]> {
     const res = await fetch(
       `${API_BASE_URL}/api/v1/events`,
-      { cache: "no-store" }
+      { cache: "no-store", headers: getAuthHeaders() }
     );
 
     return handleResponse<Event[]>(res);
@@ -100,9 +137,7 @@ export const api = {
       `${API_BASE_URL}/api/v1/events`,
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(payload),
       }
     );
@@ -113,7 +148,7 @@ export const api = {
   async getEventDetail(eventId: string): Promise<EventDetail> {
     const res = await fetch(
       `${API_BASE_URL}/api/v1/events/${eventId}`,
-      { cache: "no-store" }
+      { cache: "no-store", headers: getAuthHeaders() }
     );
 
     return handleResponse<EventDetail>(res);
@@ -122,7 +157,7 @@ export const api = {
   async getEventSummary(eventId: string): Promise<EventSummary> {
     const res = await fetch(
       `${API_BASE_URL}/api/v1/events/${eventId}/summary`,
-      { cache: "no-store" }
+      { cache: "no-store", headers: getAuthHeaders() }
     );
 
     return handleResponse<EventSummary>(res);
@@ -133,7 +168,7 @@ export const api = {
   ): Promise<BookingHistoryResponse> {
     const res = await fetch(
       `${API_BASE_URL}/api/v1/events/${eventId}/bookings`,
-      { cache: "no-store" }
+      { cache: "no-store", headers: getAuthHeaders() }
     );
 
     return handleResponse<BookingHistoryResponse>(res);
@@ -150,9 +185,7 @@ export const api = {
       `${API_BASE_URL}/api/v1/events/${eventId}/seats/block`,
       {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(payload),
       }
     );
@@ -168,13 +201,27 @@ export const api = {
       `${API_BASE_URL}/api/v1/events/${eventId}/bookings`,
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(payload),
       }
     );
 
     return handleResponse<BookingResponse>(res);
+  },
+
+  async deleteEvent(eventId: string): Promise<void> {
+    const res = await fetch(`${API_BASE_URL}/api/v1/events/${eventId}`, {
+      method: "DELETE",
+      headers: getAuthHeaders(),
+    });
+
+    if (!res.ok) {
+      const errorData = await parseErrorResponse(res);
+      let errorDetail = `HTTP ${res.status}: ${res.statusText}`;
+      if (typeof errorData?.detail === "string") {
+        errorDetail = errorData.detail;
+      }
+      throw new ApiClientError(res.status, errorDetail, errorData);
+    }
   },
 };

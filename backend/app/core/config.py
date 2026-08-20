@@ -8,6 +8,11 @@ class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
     PORT: int = 8000
 
+    # Security / Auth Settings
+    SECRET_KEY: str = "super-secret-key-change-in-production-event-seat-booking-2026"
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24
+
     # MySQL Database Settings
     DB_HOST: str = "localhost"
     DB_PORT: int = 3306

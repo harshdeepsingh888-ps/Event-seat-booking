@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.db.session import check_db_connection
 from app.api.v1.events import router as events_router
+from app.api.v1.auth import router as auth_router
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -19,7 +20,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth_router, prefix="/api/v1")
 app.include_router(events_router, prefix="/api/v1")
+
 
 @app.get("/health", status_code=status.HTTP_200_OK)
 async def health_check():

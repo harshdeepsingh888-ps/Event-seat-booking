@@ -6,15 +6,23 @@ import { ApiClientError, api } from "@/lib/api";
 import { Event } from "@/types";
 import AdminEventCard from "@/components/admin/AdminEventCard";
 import CreateEventModal from "@/components/admin/CreateEventModal";
+import { useAuth } from "@/context/AuthContext";
 
 function AdminContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user, isLoading: isAuthLoading, isAdmin, logout } = useAuth();
 
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isAuthLoading && (!user || !isAdmin)) {
+      router.push("/admin/login");
+    }
+  }, [isAuthLoading, user, isAdmin, router]);
 
   const isCreateParam = searchParams.get("create") === "true";
   const showModal = isCreateModalOpen || isCreateParam;
@@ -40,6 +48,8 @@ function AdminContent() {
   useEffect(() => {
     let active = true;
 
+    if (!user || !isAdmin) return;
+
     api
       .getEvents()
       .then((data) => {
@@ -62,7 +72,7 @@ function AdminContent() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [user, isAdmin]);
 
   const handleCloseModal = () => {
     setIsCreateModalOpen(false);
@@ -75,6 +85,14 @@ function AdminContent() {
     setIsCreateModalOpen(false);
     router.push(`/admin/events/${createdEvent.id}`);
   };
+
+  if (isAuthLoading || !user || !isAdmin) {
+    return (
+      <div style={{ padding: "2rem", textAlign: "center" }}>
+        Checking authorization...
+      </div>
+    );
+  }
 
   return (
     <div
@@ -122,7 +140,7 @@ function AdminContent() {
               marginTop: "0.4rem",
             }}
           >
-            Manage events, seats, and booking activity.
+            Signed in as <strong>{user.full_name}</strong> ({user.email})
           </p>
         </div>
 
@@ -140,6 +158,16 @@ function AdminContent() {
             onClick={() => setIsCreateModalOpen(true)}
           >
             Create Event
+          </button>
+
+          <button
+            className="btn btn-secondary"
+            onClick={() => {
+              logout();
+              router.push("/admin/login");
+            }}
+          >
+            Sign Out
           </button>
         </div>
       </div>
@@ -207,7 +235,11 @@ function AdminContent() {
           }}
         >
           {events.map((event) => (
-            <AdminEventCard key={event.id} event={event} />
+            <AdminEventCard
+              key={event.id}
+              event={event}
+              onDeleteSuccess={() => void loadEvents()}
+            />
           ))}
         </div>
       )}

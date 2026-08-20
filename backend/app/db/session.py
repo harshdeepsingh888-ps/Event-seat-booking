@@ -17,6 +17,10 @@ AsyncSessionLocal = async_sessionmaker(
     autoflush=False
 )
 
+async def get_db():
+    async with AsyncSessionLocal() as session:
+        yield session
+
 async def check_db_connection() -> bool:
     try:
         async with engine.connect() as conn:
@@ -25,3 +29,4 @@ async def check_db_connection() -> bool:
     except Exception as e:
         print(f"[DB HEALTH CHECK FAILED] Connection error: {e}")
         return False
+

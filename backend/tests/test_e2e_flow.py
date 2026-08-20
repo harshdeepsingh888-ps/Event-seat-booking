@@ -7,7 +7,8 @@ from sqlalchemy import event, text
 
 from app.main import app
 from app.models import Base
-from app.api.v1.events import get_db
+from app.db.session import get_db
+
 
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
@@ -43,6 +44,9 @@ async def test_session():
     await engine.dispose()
 
 
+from app.models.user import User
+from app.core.security import hash_password, create_access_token
+
 @pytest.mark.asyncio
 async def test_full_e2e_event_lifecycle(test_session: AsyncSession):
     """
@@ -55,7 +59,19 @@ async def test_full_e2e_event_lifecycle(test_session: AsyncSession):
     6. User 2 books seat A3.
     7. Admin unblocks seat B1 and verifies summary integrity.
     """
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+    admin_user = User(
+        id=str(uuid.uuid4()),
+        email="admin_e2e@test.com",
+        hashed_password=hash_password("admin123"),
+        full_name="Admin E2E",
+        role="ADMIN"
+    )
+    test_session.add(admin_user)
+    await test_session.commit()
+    token = create_access_token(subject=admin_user.id, role="ADMIN")
+    headers = {"Authorization": f"Bearer {token}"}
+
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test", headers=headers) as client:
         # Step 1: Admin Creates Event (2 rows x 3 cols = 6 seats)
         create_res = await client.post(
             "/api/v1/events",
