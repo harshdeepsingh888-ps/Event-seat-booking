@@ -13,6 +13,7 @@ import { useAuth } from "@/context/AuthContext";
 import AnalyticsCards from "@/components/admin/AnalyticsCards";
 import AdminSeatGrid from "@/components/admin/AdminSeatGrid";
 import BookingHistoryTable from "@/components/admin/BookingHistoryTable";
+import SeatLegend from "@/components/SeatLegend";
 
 interface PageProps {
   params: Promise<{ eventId: string }>;
@@ -405,13 +406,16 @@ export default function AdminEventDetailPage({ params }: PageProps) {
       </div>
 
       {activeTab === "seats" ? (
-        <AdminSeatGrid
-          eventId={eventDetail.id}
-          seats={eventDetail.seats}
-          totalRows={Number(eventDetail.total_rows)}
-          totalCols={Number(eventDetail.total_cols)}
-          onMutationSuccess={() => void loadAllData()}
-        />
+        <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+          <SeatLegend />
+          <AdminSeatGrid
+            eventId={eventDetail.id}
+            seats={eventDetail.seats}
+            totalRows={Number(eventDetail.total_rows)}
+            totalCols={Number(eventDetail.total_cols)}
+            onMutationSuccess={() => void loadAllData()}
+          />
+        </div>
       ) : (
         <BookingHistoryTable history={bookingHistory} />
       )}

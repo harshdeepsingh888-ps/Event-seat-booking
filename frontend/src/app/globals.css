@@ -498,6 +498,49 @@ body {
   color: var(--text-secondary);
 }
 
+.seat-legend {
+  display: flex;
+  align-items: center;
+  gap: 1.75rem;
+  padding: 1rem 1.5rem;
+  flex-wrap: wrap;
+  border-radius: 16px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.legend-sample {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.legend-sample.seat-available {
+  background-color: var(--seat-available-bg);
+}
+
+.legend-sample.seat-selected {
+  background-color: var(--seat-selected-bg);
+  box-shadow: 0 0 0 2px var(--seat-selected-ring);
+}
+
+.legend-sample.seat-booked {
+  background-color: var(--seat-booked-bg);
+}
+
+.legend-sample.seat-blocked {
+  background-color: var(--seat-blocked-bg);
+}
+
 .chip-dot {
   width: 13px;
   height: 13px;
